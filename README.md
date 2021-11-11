@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The recommended treatment for high-risk non-muscle invasive bladder cancer (HR-NMIBC) patients is intravesical *Bacillus Calmette-Guérin* (BCG) instillations, yet only 50% of patients benefit from BCG therapy. Through molecular profiling of 283 BCG-naïve, HR-NMIBC patients in two separate patient cohorts, with 44 matched post-BCG recurrences, we delineate three distinct BCG Response Subtypes (BRS1-3). Patients with BRS3 tumors have reduced high-grade recurrence-free and progression-free survival as compared to BRS1/2 tumors. BRS3 tumors expressed high EMT-basal markers and have an immunosuppresive profile, which was confirmed with spatial proteomics. The prognostic relevance of the BRS stratification was validated and improved the current recommended clinical guidelines, which is based on clinicopathological variables.
+The recommended treatment for high-risk non-muscle invasive bladder cancer (HR-NMIBC) patients is intravesical *Bacillus Calmette-GuÃ©rin* (BCG) instillations, yet only 50% of patients benefit from BCG therapy. Through molecular profiling of 283 BCG-naÃ¯ve, HR-NMIBC patients in two separate patient cohorts, with 44 matched post-BCG recurrences, we delineate three distinct BCG Response Subtypes (BRS1-3). Patients with BRS3 tumors have reduced high-grade recurrence-free and progression-free survival as compared to BRS1/2 tumors. BRS3 tumors expressed high EMT-basal markers and have an immunosuppresive profile, which was confirmed with spatial proteomics. The prognostic relevance of the BRS stratification was validated and improved the current recommended clinical guidelines, which is based on clinicopathological variables.
 
 ## Contents
 
@@ -63,7 +63,7 @@ de Jong et al. *Submitted*
 
 ## Reproducing results from de Jong et al.
 
-See the vignette ```BRS prediction``` listed for the package at ```vignette(package="BRSpred")``` for training, validation, and prediction of an external cohort (UROMOL) using the proposed BRS-methodology. The raw contents of this vignette are located in the folder ```/vignettes/brs.Rmd```, or for the compiled package inside ```/doc/brs.html``` (if compiled to HTML as expected by default).
+See the vignette ```BRS prediction``` listed for the package at ```vignette(package="BRSpred")``` for training and validation using the proposed BRS-methodology. The raw contents of this vignette are located in the folder ```/vignettes/brs.Rmd```, or for the compiled package inside ```/doc/brs.html``` (if compiled to HTML as expected by default).
 
 ## Acknowledgements
 
