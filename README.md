@@ -19,7 +19,12 @@ In order to install ```BRSpred``` directly from GitHub:
 
 ```
 devtools::install_github("CostelloLab/BRSpred", dependencies=TRUE)
-library(BRSpred)
+```
+
+The ```install_github``` does not build vignettes for the user by default. In order to have the vignettes, one should install the package with the help of ```Rtools``` while adding:
+
+```
+devtools::install_github("CostelloLab/BRSpred", dependencies=TRUE, build_vignettes=TRUE)
 ```
 
 Alternatively, one can install the package from a local source tarball in the R terminal with:
@@ -28,6 +33,12 @@ install.packages("BRSpred_VERSION.tar.gz", repos=NULL, type="source")
 ```
 
 Note that one must install dependencies from a R package repository such as CRAN in order to BRSpred to work.
+
+Load the package to the current workspace by:
+
+```
+library(BRSpred)
+```
 
 ## Dependencies
 
@@ -47,6 +58,8 @@ In order to fully run the vignette reproducing results and/or build the package,
 * roxygen2,
 * knitr,
 * rmarkdown,
+
+Use of ```Rtools``` may be needed for compiling the package on Windows.
 
 ## Usage
 
