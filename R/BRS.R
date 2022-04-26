@@ -32,8 +32,11 @@
 #' BRS(x=CohortB.vst, train=CohortA.vst, threshold=0.6606584)
 #'
 #' @import pamr
+#' @import matrixStats
+#' @import survminer
 #'
 #' @importFrom preprocessCore normalize.quantiles.use.target
+#' @importFrom stats median quantile
 #'
 #' @export
 BRS <- function(

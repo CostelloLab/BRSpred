@@ -14,6 +14,11 @@ NULL
 #' @rdname ErasmusMC
 "erasmus.clinical"
 
+#' Immune cell estimates (Sup Table S5) for the Erasmus MC cohorts A and B
+#'
+#' @rdname ErasmusMC
+"erasmus.immune"
+
 #' ErasmusMC NMIBC Cohort A (training, variance stabilizing transformation)
 #'
 #' @rdname ErasmusMC
@@ -35,7 +40,7 @@ NULL
 #'
 #' Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. Further, transcriptomics data for training and validation are provided.
 #' 
-#' @import ConsensusClusterPlus pheatmap RColorBrewer knitr rmarkdown
+#' @import ConsensusClusterPlus
 #'
 #' @docType package
 #' @name BRSpred

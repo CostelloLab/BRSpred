@@ -3,11 +3,14 @@
 \docType{data}
 \name{erasmus.clinical}
 \alias{erasmus.clinical}
+\alias{erasmus.immune}
 \alias{CohortA.vst}
 \alias{CohortB.vst}
 \title{Clinical information for the Erasmus MC cohorts A and B}
 \format{
-An object of class \code{data.frame} with 328 rows and 26 columns.
+An object of class \code{data.frame} with 328 rows and 28 columns.
+
+An object of class \code{data.frame} with 283 rows and 11 columns.
 
 An object of class \code{data.frame} with 13922 rows and 132 columns.
 
@@ -16,12 +19,16 @@ An object of class \code{data.frame} with 18733 rows and 151 columns.
 \usage{
 erasmus.clinical
 
+erasmus.immune
+
 CohortA.vst
 
 CohortB.vst
 }
 \description{
 Clinical information for the Erasmus MC cohorts A and B
+
+Immune cell estimates (Sup Table S5) for the Erasmus MC cohorts A and B
 
 ErasmusMC NMIBC Cohort A (training, variance stabilizing transformation)
 

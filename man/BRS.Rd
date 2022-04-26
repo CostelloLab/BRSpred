@@ -9,7 +9,7 @@ BRS(
   x,
   train = BRSpred::CohortA.vst,
   pamrobj = BRSpred::pamr3cl,
-  threshold = 0.6606584,
+  threshold = 0.1651646,
   type = "class",
   qnormalize = TRUE,
   zscale = TRUE,
