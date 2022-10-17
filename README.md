@@ -72,7 +72,14 @@ For further usage and prior results, see the vignette ```BRS prediction```.
 
 ## Citation
 
-de Jong et al. *Submitted*
+Florus C. de Jong, Teemu D. Laajala, Robert F. Hoedemaeker, Kimberley R. Jordan, Angelique C.J. van der Made, Egbert R. Boevé, Deric K.E. van der Schoot, Bart Nieuwkamer, Emiel A.M. Janssen, Tokameh Mahmoudi, Joost L. Boormans, Dan Theodorescu, James C. Costello, Tahlita C.M. Zuiverloon
+
+_Non-muscle Invasive Bladder Cancer Molecular Subtypes Predict Differential Response to Intravesical Bacillus Calmette-Guérin_
+
+medRxiv 2021.11.30.21266988; doi: https://doi.org/10.1101/2021.11.30.21266988
+
+*Submitted*
+
 
 ## Reproducing results from de Jong et al.
 
