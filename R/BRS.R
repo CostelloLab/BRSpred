@@ -5,16 +5,17 @@
 #
 ###
 
+
 #' Main BRS subclass predictor
 #'
 #' @details
-#' This is the main BCG response subtype predictor function. It essentially works as a wrapper for the original 3-class pamr-object, with imputation and other convenience functionality.
+#' This is the main BCG response subtype predictor function. It essentially works as a wrapper for 3-class pamr-object classifier, with training and optimal threshold determined using cross-validation. Convenience functions, such as imputation for missing genes and quantile normalization, are provided; note however
 #'
 #' @param x Input data matrix
 #' @param train Training data matrix; used for imputing missing gene names (by default original training data matrix)
 #' @param pamrobj pamr-package object of class 'pamr', by default the original one trained for the package
-#' @param threshold pamr threshold parameter (by default the optimal threshold found by CV in training data)
-#' @param type Type of prediction as given to pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero'
+#' @param threshold pamr-prediction threshold parameter (if missing, by default the optimal threshold is identified by minimizing CV misclassification rate)
+#' @param Type of prediction as given by pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero' (see ?pamr.predict)
 #' @param qnormalize Should quantile normalization be applied to 'x' in respect to the training data
 #' @param zscale Should z-score scaling be applied to data; by default TRUE
 #' @param verb Verbosity
@@ -23,13 +24,14 @@
 #' @references
 #' de Jong F. C., Laajala T. D., et al. Citation
 #'
-#' @return pamr::pamr.predict-call predictions for the input 'x'
+#' @return pamr::pamr.predict-call predictions or a list with the prediction and corresponding data matrices and pamr-object and threshold
 #'
 #' @rdname BRS
 #'
 #' @examples
 #' library(BRSpred)
-#' BRS(x=CohortB.vst, train=CohortA.vst, threshold=0.6606584)
+#' predict_post <- BRSpred::BRS(newx = BRSpred::CohortA_post, scale = "together")
+#' predict_cohortb <- BRSpred::BRS(newx = BRSpred::CohortB, scale = "independent")
 #'
 #' @import pamr
 #' @import matrixStats
@@ -37,68 +39,156 @@
 #'
 #' @importFrom preprocessCore normalize.quantiles.use.target
 #' @importFrom stats median quantile
+#' @importFrom matrixStats rowVars
 #'
 #' @export
 BRS <- function(
-	# Input data matrix
-	x,
-	# Training data matrix; used for imputing missing gene names (by default original training data matrix)
-	train = BRSpred::CohortA.vst,
+	# New data matrix to predict on
+	newx,
+	# Training data matrix x and classes y
+	trainx = as.matrix(BRSpred::CohortA_pre),
+	trainy = BRSpred::erasmus_clinical[colnames(BRSpred::CohortA_pre),"Erasmus.BRS"],
+	# Should only common genes be considered (prevents need for potential imputation)
+	common = TRUE,
+	# Subset of genes used in the training; by default top 2000 variable genes in the training data
+	genes,
 	# pamr-object used for prediction (trained previously using 'train')
-	pamrobj = BRSpred::pamr3cl,
-	# pamr threshold parameter (by default the optimal threshold found by CV in training data)
-	threshold = 0.1651646,
-	# Prediction type; allowed by pamr: 'class', 'posterior', 'centroid', or 'nonzero'
+	pamrobj,
+	# RNG seed, if cross-validation is used for threshold-determination this should be set
+	seed = 1234,
+	# If provided, will designate number of folds in the CV
+	nfold,
+	# pamr-prediction threshold parameter (if missing, by default the optimal threshold is identified by minimizing CV misclassification rate)
+	threshold,
+	# Type of prediction as given by pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero' (see ?pamr.predict)
 	type = "class",
-	# Should quantile normalization be applied to 'x' in respect to the training data
+	# Scaling of data; none, or together with or independently of the training data
+	scale = c("together", "independent", "none"),
+	# Should quantile normalization be applied to 'newx' in respect to the training data; TRUE does this prior to pamr.training by default
 	qnormalize = TRUE,
-	# Should z-score scaling be applied to data; by default TRUE
-	zscale = TRUE,
+	# Should gene imputation allowed via internal function if not pre-processed by user
+	impute = FALSE,
+	# Should all objects be returned - will instead create a list with predictions, pamr object, newx, trainx, and trainy
+	getall = FALSE,
 	# Verbosity
 	verb = TRUE,
 	# Additional parameters passed on to pamr.predict
 	...
 ){
+	# If seed is needed; set to NULL if ought to be omitted - essential for CV reproducibility
+	if(!is.null(seed)){
+		set.seed(seed)
+	}
+	
+	# Should only common genes be considered for training
+	if(common){
+		newx <- newx[intersect(rownames(newx), rownames(trainx)),]
+		trainx <- trainx[rownames(newx),]
+	}
+	
+	# Perform pre-training quantile-normalization	
 	if(qnormalize){
-		if(verb) print("Performing quantile normalization")
-		dimn <- dimnames(x)
-		x <- preprocessCore::normalize.quantiles.use.target(
-			x = as.matrix(x), 
-			target = c(unlist(BRSpred::CohortA.vst))
+		if(verb) cat("\nPerforming pre-pamr quantile normalization\n")
+		dimn <- dimnames(newx)
+		newx <- preprocessCore::normalize.quantiles.use.target(
+			x = as.matrix(newx), 
+			target = c(unlist(trainx))
 		)
-		dimnames(x) <- dimn
-		if(verb){
-			print("Quantiles in x and train post-normalization:")
-			print(quantile(as.matrix(x)))
-			print(quantile(c(unlist(train))))
+		dimnames(newx) <- dimn
+	}
+
+	# Set of genes to use in the pamr object
+	# By default 2000 top varying genes
+	if(missing(genes)){
+		genes <- head(order(matrixStats::rowVars(trainx), decreasing = TRUE), 2000)
+	}
+	# Subset to genes of interest
+	if(missing(pamrobj)){
+		trainx <- trainx[genes,]
+	}
+	newx <- newx[genes,]
+	
+	# z-scale gene-wise; can be done together or separately from the training data
+	if(scale %in% c("together", 1)){
+		if(verb) cat("\nRow-wise scaling together with the training data\n")
+		# Scale together
+		sets <- cbind(newx, trainx)
+		sets <- t(scale(t(sets)))
+		# Subset back to original
+		newx <- sets[,1:ncol(newx)]
+		trainx <- sets[,(ncol(newx)+1):ncol(sets)]		
+	}else if(scale %in% c("independent", "separately", 2)){
+		if(verb) cat("\nScaling newx independently of training data\n")
+		newx <- t(scale(t(newx)))
+		trainx <- t(scale(t(trainx)))
+	}else{
+		if(verb) cat("\nNo scaling performed\n")
+	}
+
+	# Format a training list for a pamr-object
+	train.list <- list(
+		x = trainx, # Input data matrix
+		y = trainy, # Response vector to train on
+		genenames = rownames(trainx), # Names for genes
+		sampnames = colnames(trainy), # Sample names
+		gene.ids = rownames(trainy) # Identifiers for genes
+	)
+
+	# pamrobj missing - train one
+	if(missing(pamrobj)){
+		if(verb) cat("\npamr-object missing, training one using pamr::pamr.train\n")
+		
+		pamrobj <- pamr::pamr.train(data = train.list)
+	}
+	# If threshold is missing, obtain it from cross-validation on the pamr object
+	if(missing(threshold)){
+		if(verb) cat("\nPre-determined pamr-object threshold not provided, calculating one via CV\n")
+
+		# Run cross-validation
+		if(missing(nfold)){
+			cv <- pamr::pamr.cv(pamrobj, data = train.list)
+		}else{
+			cv <- pamr::pamr.cv(pamrobj, data = train.list, nfold = nfold)
 		}
+		
+		# Pick the largest threshold that minimizes the misclassification rate
+		threshold <- cv$threshold[max(which(cv$error == min(cv$error)))]
 	}
-	if(zscale){
-		if(verb) print("Z-score scaling to 'x' and 'train' (shift to zero mean, unit stdev)")
-		x <- t(scale(t(x)))
-		train <- t(scale(t(train)))
+
+	# If imputation is allowed for missing genes
+	if(impute){
+		newx <- BRSpred:::BRS_impute(x=newx, train=trainx)
+		newx <- newx[rownames(pamrobj$centroids),]
 	}
-	if(verb){
-		print("input 'x' dimensions prior to BRS_impute:")
-		print(dim(x))
+
+
+	# Subsetting new data to the training data gene-centroids prior to predictions
+	newx <- newx[rownames(pamrobj$centroids),]	
+
+	# Predict using pamr
+	pred <- pamr::pamr.predict(fit=pamrobj, newx=newx, threshold=threshold, type=type, ...)
+	# Return just predictions
+	if(!getall){	
+		# Predict classes
+		pred
+	# Additional output as a list, such as the data matrices and pamr-object
+	}else{
+		list(
+			pred = pred,
+			newx = newx,
+			trainx = trainx,
+			trainy = trainy,
+			pamrobj = pamrobj,
+			threshold = threshold
+		)
 	}
-	x <- BRSpred:::BRS_impute(x=x, train=train)
-	if(verb){
-		print("input 'x' dimensions post BRS_impute:")
-		print(dim(x))
-	}
-	x <- x[rownames(pamrobj$centroids),]
-	if(verb){
-		print("input 'x' dimensions after subsetting with pamr-object centroids:")
-		print(dim(x))
-	}	
-	pamr::pamr.predict(fit=pamrobj, newx=x, threshold=threshold, type=type, ...)
 }
 
 #' Imputation based on medians from training data for gene names that are missing from input data
 #'
 #' @param x New data matrix 'x' with potentially missing rownames
 #' @param train Original training data matrix
+#' @param FUN Function that provides within-row imputations; by default mean, see also e.g. median
 #' @param verb Verbosity
 #'
 #' @details
@@ -108,6 +198,7 @@ BRS <- function(
 BRS_impute <- function(
 	x,
 	train,
+	FUN = \(x) { median(x, na.rm=TRUE) },
 	verb = TRUE
 ){
 	# Identify row names not present in x
@@ -115,7 +206,7 @@ BRS_impute <- function(
 	if(!length(gs)==0){
 		warning(paste0("Missing gene names imputed: ", paste0(gs, collapse=", ")))
 		imputed <- do.call("rbind", lapply(gs, FUN=function(g){
-			rep(median(as.numeric(train[g,])), times=ncol(x))
+			rep(FUN(as.numeric(train[g,])), times=ncol(x))
 		}))
 		rownames(imputed) <- gs
 		colnames(imputed) <- colnames(x)
