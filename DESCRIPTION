@@ -6,11 +6,12 @@ Authors@R: c(
 	person("Teemu D.", "Laajala", email = "teelaa@utu.fi", role = c("aut", "cre")),
 	person("Florus C.", "de Jong", email = "f.c.dejong@erasmusmc.nl", role = c("aut")),
 	person("James C.", "Costello", email = "james.costello@cuanschutz.edu", role = c("ctb")))
-Description: Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. Further, transcriptomics data for training and validation are provided.
-Depends: R (>= 3.5.0), pamr, survminer, matrixStats, preprocessCore
+Description: Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer, with subsequent pamr-centroid based clustering pipeline for new samples. Further, transcriptomics data for training and validation are provided.
+Depends: R (>= 3.5.0)
 Encoding: UTF-8
-License: GPL (>= 3)
+License: GPL (>= 3) + file LICENSE
 LazyData: true
+LazyDataCompression: xz
 Imports:
 	pamr,
 	survminer,
@@ -26,5 +27,5 @@ Suggests:
 	rmarkdown,
 	survival,
 	ggplot2
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr

@@ -9,22 +9,29 @@
 #' Main BRS subclass predictor
 #'
 #' @details
-#' This is the main BCG response subtype predictor function. It essentially works as a wrapper for 3-class pamr-object classifier, with training and optimal threshold determined using cross-validation. Convenience functions, such as imputation for missing genes and quantile normalization, are provided; note however
+#' This is the main BCG response subtype predictor function. It essentially works as a wrapper for training a 3-class pamr-object classifier, with optimal threshold determined using cross-validation. Convenience functions, such as z-score scaling, quantile normalization, and missing gene imputation are provided. Notice however, that the centroid based classifier may be sensitive to the choices in respect to these parameters.
 #'
-#' @param x Input data matrix
-#' @param train Training data matrix; used for imputing missing gene names (by default original training data matrix)
-#' @param pamrobj pamr-package object of class 'pamr', by default the original one trained for the package
+#' @param newx Input data matrix
+#' @param trainx Training data matrix x; by default Cohort A pre-BCG samples
+#' @param trainy Training subclasses y; by default BRS classes identified via consensus clustering for Cohort A pre-BCG samples
+#' @param common Should only common genes be considered (prevents need for potential imputation)
+#' @param genes Subset of genes used in the training; by default top 2000 variable genes in the training data
+#' @param pamrobj Previously trained pamr-object used for prediction; by default pamr object is instead trained on the fly based on trainx and trainy
+#' @param seed RNG seed, if cross-validation is used for threshold-determination this should be set; by default 1234
+#' @param nfold If provided, will designate number of folds in the CV (defaults to pamr.cv's default value)
 #' @param threshold pamr-prediction threshold parameter (if missing, by default the optimal threshold is identified by minimizing CV misclassification rate)
-#' @param Type of prediction as given by pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero' (see ?pamr.predict)
-#' @param qnormalize Should quantile normalization be applied to 'x' in respect to the training data
-#' @param zscale Should z-score scaling be applied to data; by default TRUE
+#' @param type Type of prediction as given by pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero' (see ?pamr.predict)
+#' @param scale Z score based scaling of data; none, or together with or independently of the training data; notice that the centroids are sensitive to scaling
+#' @param qnormalize Should quantile normalization be applied to 'x' in respect to the training data (by default TRUE)
+#' @param impute Should gene imputation be allowed via internal function if not pre-processed by user (by default FALSE)
+#' @param getall Should all objects be returned - will instead create a list with predictions, pamr object, newx, trainx, and trainy (by default FALSE)
 #' @param verb Verbosity
 #' @param ... Additional parameters passed on to pamr::pamr.predict
 #'
 #' @references
 #' de Jong F. C., Laajala T. D., et al. Citation
 #'
-#' @return pamr::pamr.predict-call predictions or a list with the prediction and corresponding data matrices and pamr-object and threshold
+#' @return pamr::pamr.predict-call predictions (getall == FALSE) or a list with the prediction and corresponding data matrices and pamr-object and threshold (getall == TRUE)
 #'
 #' @rdname BRS
 #'
@@ -34,12 +41,10 @@
 #' predict_cohortb <- BRSpred::BRS(newx = BRSpred::CohortB, scale = "independent")
 #'
 #' @import pamr
-#' @import matrixStats
-#' @import survminer
-#'
 #' @importFrom preprocessCore normalize.quantiles.use.target
 #' @importFrom stats median quantile
 #' @importFrom matrixStats rowVars
+#' @importFrom utils head
 #'
 #' @export
 BRS <- function(
@@ -52,7 +57,7 @@ BRS <- function(
 	common = TRUE,
 	# Subset of genes used in the training; by default top 2000 variable genes in the training data
 	genes,
-	# pamr-object used for prediction (trained previously using 'train')
+	# Previously trained pamr-object used for prediction; by default pamr object is instead trained on the fly based on trainx and trainy
 	pamrobj,
 	# RNG seed, if cross-validation is used for threshold-determination this should be set
 	seed = 1234,
@@ -66,7 +71,7 @@ BRS <- function(
 	scale = c("together", "independent", "none"),
 	# Should quantile normalization be applied to 'newx' in respect to the training data; TRUE does this prior to pamr.training by default
 	qnormalize = TRUE,
-	# Should gene imputation allowed via internal function if not pre-processed by user
+	# Should gene imputation be allowed via internal function if not pre-processed by user
 	impute = FALSE,
 	# Should all objects be returned - will instead create a list with predictions, pamr object, newx, trainx, and trainy
 	getall = FALSE,
@@ -157,7 +162,7 @@ BRS <- function(
 
 	# If imputation is allowed for missing genes
 	if(impute){
-		newx <- BRSpred:::BRS_impute(x=newx, train=trainx)
+		newx <- BRS_impute(x=newx, train=trainx)
 		newx <- newx[rownames(pamrobj$centroids),]
 	}
 
@@ -184,7 +189,7 @@ BRS <- function(
 	}
 }
 
-#' Imputation based on medians from training data for gene names that are missing from input data
+#' Imputation based on mean/medians from training data for gene names that are missing from input data
 #'
 #' @param x New data matrix 'x' with potentially missing rownames
 #' @param train Original training data matrix
@@ -192,13 +197,14 @@ BRS <- function(
 #' @param verb Verbosity
 #'
 #' @details
-#' Imputation of gene expression values based on median from an existing training data.
+#' Imputation of gene expression values based on mean/median from an existing training data.
 #'
-#' @rdname BRS
+#' @noRd
+#' @keywords internal
 BRS_impute <- function(
 	x,
 	train,
-	FUN = \(x) { median(x, na.rm=TRUE) },
+	FUN = \(x) { mean(x, na.rm=TRUE) },
 	verb = TRUE
 ){
 	# Identify row names not present in x
@@ -227,7 +233,8 @@ BRS_impute <- function(
 #' @details
 #' Original implementation by authors of the 'pamr'-package's function 'pamr.listgenes'; this is merely a small adjustment for user convenience.
 #'
-#' @export
+#' @noRd
+#' @keywords internal
 BRS_pamr.listgenes <- function(
 	fit, 
 	data, 

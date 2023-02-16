@@ -2,58 +2,73 @@
 % Please edit documentation in R/BRS.R
 \name{BRS}
 \alias{BRS}
-\alias{BRS_impute}
 \title{Main BRS subclass predictor}
 \usage{
 BRS(
-  x,
-  train = BRSpred::CohortA.vst,
-  pamrobj = BRSpred::pamr3cl,
-  threshold = 0.1651646,
+  newx,
+  trainx = as.matrix(BRSpred::CohortA_pre),
+  trainy = BRSpred::erasmus_clinical[colnames(BRSpred::CohortA_pre), "Erasmus.BRS"],
+  common = TRUE,
+  genes,
+  pamrobj,
+  seed = 1234,
+  nfold,
+  threshold,
   type = "class",
+  scale = c("together", "independent", "none"),
   qnormalize = TRUE,
-  zscale = TRUE,
+  impute = FALSE,
+  getall = FALSE,
   verb = TRUE,
   ...
 )
-
-BRS_impute(x, train, verb = TRUE)
 }
 \arguments{
-\item{x}{New data matrix 'x' with potentially missing rownames}
+\item{newx}{Input data matrix}
 
-\item{train}{Original training data matrix}
+\item{trainx}{Training data matrix x; by default Cohort A pre-BCG samples}
 
-\item{pamrobj}{pamr-package object of class 'pamr', by default the original one trained for the package}
+\item{trainy}{Training subclasses y; by default BRS classes identified via consensus clustering for Cohort A pre-BCG samples}
 
-\item{threshold}{pamr threshold parameter (by default the optimal threshold found by CV in training data)}
+\item{common}{Should only common genes be considered (prevents need for potential imputation)}
 
-\item{type}{Type of prediction as given to pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero'}
+\item{genes}{Subset of genes used in the training; by default top 2000 variable genes in the training data}
 
-\item{qnormalize}{Should quantile normalization be applied to 'x' in respect to the training data}
+\item{pamrobj}{Previously trained pamr-object used for prediction; by default pamr object is instead trained on the fly based on trainx and trainy}
 
-\item{zscale}{Should z-score scaling be applied to data; by default TRUE}
+\item{seed}{RNG seed, if cross-validation is used for threshold-determination this should be set; by default 1234}
+
+\item{nfold}{If provided, will designate number of folds in the CV (defaults to pamr.cv's default value)}
+
+\item{threshold}{pamr-prediction threshold parameter (if missing, by default the optimal threshold is identified by minimizing CV misclassification rate)}
+
+\item{type}{Type of prediction as given by pamr; eligible values 'class', 'posterior', 'centroid', 'nonzero' (see ?pamr.predict)}
+
+\item{scale}{Z score based scaling of data; none, or together with or independently of the training data; notice that the centroids are sensitive to scaling}
+
+\item{qnormalize}{Should quantile normalization be applied to 'x' in respect to the training data (by default TRUE)}
+
+\item{impute}{Should gene imputation be allowed via internal function if not pre-processed by user (by default FALSE)}
+
+\item{getall}{Should all objects be returned - will instead create a list with predictions, pamr object, newx, trainx, and trainy (by default FALSE)}
 
 \item{verb}{Verbosity}
 
 \item{...}{Additional parameters passed on to pamr::pamr.predict}
 }
 \value{
-pamr::pamr.predict-call predictions for the input 'x'
+pamr::pamr.predict-call predictions (getall == FALSE) or a list with the prediction and corresponding data matrices and pamr-object and threshold (getall == TRUE)
 }
 \description{
 Main BRS subclass predictor
-
-Imputation based on medians from training data for gene names that are missing from input data
 }
 \details{
-This is the main BCG response subtype predictor function. It essentially works as a wrapper for the original 3-class pamr-object, with imputation and other convenience functionality.
-
-Imputation of gene expression values based on median from an existing training data.
+This is the main BCG response subtype predictor function. It essentially works as a wrapper for training a 3-class pamr-object classifier, with optimal threshold determined using cross-validation. Convenience functions, such as z-score scaling, quantile normalization, and missing gene imputation are provided. Notice however, that the centroid based classifier may be sensitive to the choices in respect to these parameters.
 }
 \examples{
 library(BRSpred)
-BRS(x=CohortB.vst, train=CohortA.vst, threshold=0.6606584)
+predict_post <- BRSpred::BRS(newx = BRSpred::CohortA_post, scale = "together")
+predict_cohortb <- BRSpred::BRS(newx = BRSpred::CohortB, scale = "independent")
 
 }
 \references{

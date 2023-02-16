@@ -43,54 +43,56 @@ library(BRSpred)
 ## Datasets
 
 The package comes with two main dasets:
-* Cohort A (training) from Erasmus MC (N=132 total)
-* Cohort B (testing) from Erasmus MC (N=151 total)
+
+- Cohort A (training) from Erasmus MC (N=132 total for pre-BCG samples, and additional N=45 for post-BCG samples)
+- Cohort B (testing) from Erasmus MC (N=151 total)
 
 
 ```{r}
-data(CohortA.vst)
-data(CohortB.vst)
+data(CohortA_pre)
+data(CohortA_post)
+data(CohortB)
 ```
 
 The clinical information for the patients from Erasmus MC are stored in:
 ```{r clinical}
-data(erasmus.clinical)
-table(erasmus.clinical$Cohort)
+data(erasmus_clinical)
+table(erasmus_clinical$Cohort)
 ```
 
 ## Training
 
 Select top 2000 genes based on their variance:
 ```{r}
-topVarGenes <- head(order(matrixStats::rowVars(as.matrix(CohortA.vst)), decreasing = TRUE), 2000)
-TopVar.A  <- CohortA.vst[topVarGenes, ]
-TopVar.A2 <- t(scale(t(TopVar.A)))
+topVarGenes <- head(order(matrixStats::rowVars(as.matrix(CohortA_pre)), decreasing = TRUE), 2000)
+TopVar_A  <- CohortA_pre[topVarGenes, ]
+TopVar_A2 <- t(scale(t(TopVar_A)))
 ```
 
 Use unsupervised consensus clustering on the training cohort (A) to discover the subgroups:
 
 ```{r, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
-consensus.res <- ConsensusClusterPlus::ConsensusClusterPlus(TopVar.A2, maxK=5, reps=2500, pItem=.95, pFeature=.95, clusterAlg="pam", distance="pearson", seed=123)
-icl <- ConsensusClusterPlus::calcICL(consensus.res)
+consensus_res <- ConsensusClusterPlus::ConsensusClusterPlus(TopVar_A2, maxK=5, reps=2500, pItem=.95, pFeature=.95, clusterAlg="pam", distance="pearson", seed=123)
+icl <- ConsensusClusterPlus::calcICL(consensus_res)
 icl[["clusterConsensus"]]
 ```
 
 Append consensus classes to clinical information and reassign BRS-label numbers to be more intuitive:
 ```{r}
-consensus.df <- as.data.frame(consensus.res[[3]][["consensusClass"]])
-Clinicaldata.A.pre <- erasmus.clinical[which(erasmus.clinical$Cohort == "A" & erasmus.clinical$Tumor == "Primary"),]
-colnames(consensus.df)[1] <- paste("Erasmus.BRS")
-Clinicaldata.A.pre$Erasmus.BRS <- consensus.df$Erasmus.BRS
-Clinicaldata.A.pre$Erasmus.BRS <- gsub("^3", "BRS1", gsub("^2", "BRS3", gsub("^1", "BRS2", Clinicaldata.A.pre$Erasmus.BRS)))
-Clinicaldata.A.pre$Erasmus.BRS <- factor(Clinicaldata.A.pre$Erasmus.BRS, levels=c("BRS1", "BRS2", "BRS3"))
-table(Clinicaldata.A.pre$Erasmus.BRS)
+consensus_df <- as.data.frame(consensus_res[[3]][["consensusClass"]])
+Clinicaldata_A_pre <- erasmus_clinical[which(erasmus_clinical$Cohort == "A" & erasmus_clinical$Tumor == "Primary"),]
+colnames(consensus_df)[1] <- paste("Erasmus.BRS")
+Clinicaldata_A_pre$Erasmus.BRS <- consensus_df$Erasmus.BRS
+Clinicaldata_A_pre$Erasmus.BRS <- gsub("^3", "BRS1", gsub("^2", "BRS3", gsub("^1", "BRS2", Clinicaldata_A_pre$Erasmus.BRS)))
+Clinicaldata_A_pre$Erasmus.BRS <- factor(Clinicaldata_A_pre$Erasmus.BRS, levels=c("BRS1", "BRS2", "BRS3"))
+table(Clinicaldata_A_pre$Erasmus.BRS)
 ```
 
 Kaplan-Meier curves in the training data:
 ```{r, message=FALSE, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
-fit1 <- survival::survfit(survival::Surv(Time_to_prog_or_FUend, Progression) ~ Erasmus.BRS, data = Clinicaldata.A.pre)
+fit1 <- survival::survfit(survival::Surv(Time_to_prog_or_FUend, Progression) ~ Erasmus.BRS, data = Clinicaldata_A_pre)
 survminer::ggsurvplot(fit1,   
-	data = Clinicaldata.A.pre,   
+	data = Clinicaldata_A_pre,   
 	censor.shape="|",   
 	censor.size = 3,  
 	xlab = "Time in months",   
@@ -104,73 +106,37 @@ survminer::ggsurvplot(fit1,
 	break.time.by = 24, palette = c("forestgreen", "dodgerblue3",  "firebrick")) 
 ```
 
-## Testing set
-
-Normalize the expression in validation/testing dataset using quantile normalization:
+## Post-BCG samples
 
 ```{r}
-# Intersect common genes
-CohortA.vst2 <- CohortA.vst[intersect(rownames(CohortA.vst),rownames(CohortB.vst)), ] 
-CohortB.vst2 <- CohortB.vst[rownames(CohortB.vst) %in% rownames(CohortA.vst2), ]
-# Order genes in Cohort B to be same as in Cohort A
-CohortB.vst2 <- CohortB.vst2[match(rownames(CohortA.vst2), rownames(CohortB.vst2)),]
-# Quantile normalization
-CohortB.vst3 <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(CohortB.vst2), target = c(unlist(CohortA.vst2)))
-
-rownames(CohortB.vst3) = rownames(CohortB.vst2)
-colnames(CohortB.vst3) = colnames(CohortB.vst2)
-
-# Expression value quantiles compared to training data prior and post normalization
-quantile(as.matrix(CohortA.vst2))
-quantile(as.matrix(CohortB.vst2))
-quantile(as.matrix(CohortB.vst3))
+CohortA_post <- BRSpred::BRS(newx = BRSpred::CohortA_post, scale="together")
 ```
 
-Use `pamr` R-package after matching cohort B to the original top 2000 varying genes:
+One outlier sample was identified previously:
 
 ```{r}
-Training_set <- TopVar.A[which(rownames(TopVar.A) %in% rownames(CohortB.vst3)), ]
-Testing_B <- CohortB.vst3[ rownames(CohortB.vst3) %in% rownames(Training_set), ]
-# Reorder genes to match original 2000 gene ordering
-Testing_B <- Testing_B[match(rownames(Training_set), rownames(Testing_B)),]
 
-## Z-score scale data for PAMR
-Training_set2 <- t(scale(t(Training_set)))
-Testing_B2 <- t(scale(t(Testing_B)))
+table(vignette_prediction = CohortA_post, paper_prediction = erasmus_clinical[colnames(BRSpred::CohortA_post),"Predicted.subtype"])
+
 ```
 
-Train the `pamr` supervised model to the discovered labels and plot cross-validation as a function of penalization threshold:
-```{r, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
-set.seed(1234)
-CohortB.train.list <- list(x=as.matrix(Training_set2), y=as.factor(Clinicaldata.A.pre[,"Erasmus.BRS"]), genenames=row.names(Training_set2), samplelabels=colnames(Training_set2), geneids=row.names(Training_set2)) 
-pamr3cl <- pamr::pamr.train(data=CohortB.train.list)
-mycv <- pamr::pamr.cv(pamr3cl,data=CohortB.train.list)
-pamr::pamr.plotcv(mycv)
-```
 
-Select optimal threshold based on cross-validation minima, contributing genes and their results in CV:
-```{r}
-threshold.optimal <- mycv$threshold[max(which(mycv$error == min(mycv$error)))]
-threshold.optimal
-# Using BRS-package's re-implementation of pamr.listgenes for convenience; no forceful printing to stdout
-topgenes <- BRSpred::BRS_pamr.listgenes(pamr3cl, data=CohortB.train.list,threshold=threshold.optimal, fitcv=mycv)
-head(topgenes)
-```
+## Testing set (Cohort B)
 
 Performing prediction for cohort B:
 
 ```{r}
-CohortB_pred <- pamr::pamr.predict(fit=pamr3cl, newx=Testing_B2, threshold=threshold.optimal)
+CohortB_pred <- BRSpred::BRS(newx = BRSpred::CohortB, scale="independent")
 table(CohortB_pred)
 ```
 
 Kaplan-Meyer using the predictions for Cohort B:
 ```{r, message=FALSE, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
-Clinicaldata.B <- BRSpred::erasmus.clinical[which(BRSpred::erasmus.clinical$Cohort == "B"),]
-Clinicaldata.B$CohortB_predict <- CohortB_pred
-fit2 <- survival::survfit(survival::Surv(Time_to_prog_or_FUend, Progression) ~ CohortB_predict, data = Clinicaldata.B)
+Clinicaldata_B <- BRSpred::erasmus_clinical[which(BRSpred::erasmus_clinical$Cohort == "B"),]
+Clinicaldata_B$CohortB_predict <- CohortB_pred
+fit2 <- survival::survfit(survival::Surv(Time_to_prog_or_FUend, Progression) ~ CohortB_predict, data = Clinicaldata_B)
 survminer::ggsurvplot(fit2,
-	data = Clinicaldata.B,
+	data = Clinicaldata_B,
 	censor.shape="|", censor.size = 3,
 	xlab = "Time in months", title = "PFS in Cohort B", ylab = "Progression free proportion",
 	font.title = c(16, "bold"),
@@ -205,10 +171,10 @@ genesets <- list(
 
 Construct geneset-average expression within samples, based on the trained clustering classes (we order samples based on BRS-classes and inside each class based on progression status):
 ```{r}
-suborderA <- rownames(Clinicaldata.A.pre[order(Clinicaldata.A.pre$Erasmus.BRS, Clinicaldata.A.pre$Progression),])
+suborderA <- rownames(Clinicaldata_A_pre[order(Clinicaldata_A_pre$Erasmus.BRS, Clinicaldata_A_pre$Progression),])
 
 exprsmatA <- do.call("rbind", lapply(genesets, FUN=function(genes){
-	t(as.matrix(colMeans(CohortA.vst[genes,suborderA], na.rm=TRUE)))
+	t(as.matrix(colMeans(CohortA_pre[genes,suborderA], na.rm=TRUE)))
 }))
 rownames(exprsmatA) <- names(genesets)
 ```
@@ -217,7 +183,7 @@ These are then heatmap-plotted e.g. using ```pheatmap```-package, showing clear 
 
 ```{r, message=FALSE, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
 breaksList = seq(-1, 1, by = 0.2)
-metadata<-Clinicaldata.A.pre[,c("Progression","Erasmus.BRS")]
+metadata<-Clinicaldata_A_pre[,c("Progression","Erasmus.BRS")]
 pcols = list( 
 	Progression = c("No Progression"="limegreen", "Progression"="red"),
 	Erasmus.BRS = c("BRS1"="forestgreen","BRS2"="dodgerblue3", "BRS3"="firebrick") 
@@ -242,10 +208,10 @@ pheatmap::pheatmap(exprsmatA, cluster_rows = FALSE, cluster_cols = FALSE, scale 
 We first construct geneset-average expression within samples, with ordering based on predicted BRS classes:
 
 ```{r}
-suborderB <- rownames(Clinicaldata.B[order(Clinicaldata.B$CohortB_predict, Clinicaldata.B$Progression, decreasing = FALSE), ])
+suborderB <- rownames(Clinicaldata_B[order(Clinicaldata_B$CohortB_predict, Clinicaldata_B$Progression, decreasing = FALSE), ])
 
 exprsmatB <- do.call("rbind", lapply(genesets, FUN=function(genes){
-	t(as.matrix(colMeans(CohortB.vst[genes,suborderB], na.rm=TRUE)))
+	t(as.matrix(colMeans(CohortB[genes,suborderB], na.rm=TRUE)))
 }))
 rownames(exprsmatB) <- names(genesets)
 ```
@@ -253,7 +219,7 @@ rownames(exprsmatB) <- names(genesets)
 These are then heatmap-plotted e.g. using ```pheatmap```-package, showing clear trends connected to the BRS-classes:
 
 ```{r, message=FALSE, fig.fullwidth = TRUE, fig.width=7, fig.height=7}
-metadata<-Clinicaldata.B[,c("Progression","CohortB_predict")]
+metadata <- Clinicaldata_B[,c("Progression","CohortB_predict")]
 pcols = list( 
 	Progression = c("No Progression"="limegreen", "Progression"="red"),
 	CohortB_predict = c("BRS1"="forestgreen","BRS2"="dodgerblue3", "BRS3"="firebrick") 
@@ -275,11 +241,15 @@ pheatmap::pheatmap(exprsmatB, cluster_rows = FALSE, cluster_cols = FALSE, scale 
 
 # BRS for independent datasets
 
-The main function for performing pre-trained BRS prediction for external datasets is the ```BRS```-function. Type ```?BRS``` in R to find out more about the syntax of this function, but essentially the only input required is an appropriately normalized gene expression matrix with gene symbols as rows and samples as columns.
+The main function for performing pre-trained BRS prediction for external datasets is the ```BRS```-function. Type ```?BRS``` in R to find out more about the syntax of this function, but essentially the only input required is an appropriate gene expression matrix with gene symbols as rows and samples as columns.
+
+## Scaling and quantile normalization
+
+In order to make new predictions comparable, the ```BRS``` function offers a variety of parameters; of note, ```qnormalize``` will quantile normalize the input data to the pamr training data. Further, the ```scale``` parameter will allow different kinds of z-score scalings; value ```together``` will z-score scale both the new input data and existing training data together so that genes are zero-mean with unit variance, while value ```independent``` will scale both data matrices separately. Such normalization procedures ought to be investigated carefully, to make sure the provided pamr-pipeline is compatible with the input data.
 
 ## Missing values and lack of gene overlap
 
-If the ```BRS``` prediction wrapper function cannot find gene symbols used in the original ```pamr``` clustering, it will impute median values for these genes from the original training gene expression matrix. The wrapper will throw a warning, but not an error; a low overlap in identified genes (e.g. lack of expression in some key genes) may therefore result in poor prediction performance, so these warning messages ought to be investigated accordingly for any given cohort.
+If the ```BRS``` prediction wrapper function cannot find gene symbols used for the ```pamr``` clustering, it will impute median values for these genes from the original training gene expression matrix. The wrapper will throw a warning, but not an error; a low overlap in identified genes (e.g. lack of expression in some key genes) may therefore result in poor prediction performance, so these warning messages ought to be investigated accordingly for any given cohort.
 
 # Session info
 

@@ -4,42 +4,44 @@
 #
 ###
 
-#' Clinical information and expression matrices for the Erasmus Medical Center bladder cancer cohorts A and B
-#'
+#' Clinical information and gene expression matrices for the Erasmus Medical Center bladder cancer cohort A and B
+#' 
+#' @name ErasmusMC
 #' @rdname ErasmusMC
 NULL
 
-#' Clinical information for the Erasmus MC cohorts A and B
+#' erasmus_clinical: Clinical information for the Erasmus MC cohorts A (pre- and post-BCG) and B
 #'
 #' @rdname ErasmusMC
-"erasmus.clinical"
+"erasmus_clinical"
 
-#' Immune cell estimates (Sup Table S5) for the Erasmus MC cohorts A and B
+#' erasmus_immune: Immune cell estimates (Sup Table S5) for the Erasmus MC cohorts A and B
 #'
 #' @rdname ErasmusMC
-"erasmus.immune"
+"erasmus_immune"
 
-#' ErasmusMC NMIBC Cohort A (training, variance stabilizing transformation)
+#' CohortA_pre: ErasmusMC NMIBC Cohort A (training pre-BCG, variance stabilizing transformation)
 #'
 #' @rdname ErasmusMC
-"CohortA.vst"
+"CohortA_pre"
 
-#' ErasmusMC NMIBC Cohort B (validation, variance stabilizing transformation)
+#' CohortA_post: ErasmusMC NMIBC Cohort A (post-BCG, variance stabilizing transformation)
 #'
 #' @rdname ErasmusMC
-"CohortB.vst"
+"CohortA_post"
 
-#' pamr 3 cluster object for prediction
-"pamr3cl"
-
-
+#' CohortB: ErasmusMC NMIBC Cohort B (validation, variance stabilizing transformation)
+#'
+#' @rdname ErasmusMC
+"CohortB"
 
 ## Package documentation
 
 #' BRSpred: BCG Response Subtype Predictor for High-risk Non-Muscle Invasive Bladder Cancer
 #'
-#' Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. Further, transcriptomics data for training and validation are provided.
+#' Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. With these initial classes, a pamr-classifier is constructed for future data. Further, transcriptomics datasets for training and validation are provided along with key clinical variables.
 #' 
+#' @import survminer
 #' @import ConsensusClusterPlus
 #'
 #' @docType package
