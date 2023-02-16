@@ -5,5 +5,5 @@
 \alias{BRSpred}
 \title{BRSpred: BCG Response Subtype Predictor for High-risk Non-Muscle Invasive Bladder Cancer}
 \description{
-Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. Further, transcriptomics data for training and validation are provided.
+Consensus clustering based molecular predictor was first constructed for characterizing BCG responsiveness in bladder cancer. With these initial classes, a pamr-classifier is constructed for future data. Further, transcriptomics datasets for training and validation are provided along with key clinical variables. See the main BRS vignette for further details.
 }

@@ -14,11 +14,11 @@ An object of class \code{data.frame} with 327 rows and 27 columns.
 
 An object of class \code{data.frame} with 283 rows and 11 columns.
 
-An object of class \code{data.frame} with 13922 rows and 132 columns.
+An object of class \code{matrix} (inherits from \code{array}) with 13922 rows and 132 columns.
 
 An object of class \code{matrix} (inherits from \code{array}) with 16439 rows and 44 columns.
 
-An object of class \code{data.frame} with 18733 rows and 151 columns.
+An object of class \code{matrix} (inherits from \code{array}) with 18733 rows and 151 columns.
 }
 \usage{
 erasmus_clinical

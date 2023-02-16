@@ -39,7 +39,7 @@ NULL
 
 #' BRSpred: BCG Response Subtype Predictor for High-risk Non-Muscle Invasive Bladder Cancer
 #'
-#' Consensus clustering based molecular predictor for BCG responsiveness in bladder cancer. With these initial classes, a pamr-classifier is constructed for future data. Further, transcriptomics datasets for training and validation are provided along with key clinical variables.
+#' Consensus clustering based molecular predictor was first constructed for characterizing BCG responsiveness in bladder cancer. With these initial classes, a pamr-classifier is constructed for future data. Further, transcriptomics datasets for training and validation are provided along with key clinical variables. See the main BRS vignette for further details.
 #' 
 #' @import survminer
 #' @import ConsensusClusterPlus

@@ -44,7 +44,7 @@ library(BRSpred)
 
 The package comes with two main dasets:
 
-- Cohort A (training) from Erasmus MC (N=132 total for pre-BCG samples, and additional N=45 for post-BCG samples)
+- Cohort A (training) from Erasmus MC (N=132 total for pre-BCG samples, and additional N=44 for post-BCG samples)
 - Cohort B (testing) from Erasmus MC (N=151 total)
 
 
@@ -106,28 +106,19 @@ survminer::ggsurvplot(fit1,
 	break.time.by = 24, palette = c("forestgreen", "dodgerblue3",  "firebrick")) 
 ```
 
-## Post-BCG samples
-
-```{r}
-CohortA_post <- BRSpred::BRS(newx = BRSpred::CohortA_post, scale="together")
-```
-
-One outlier sample was identified previously:
-
-```{r}
-
-table(vignette_prediction = CohortA_post, paper_prediction = erasmus_clinical[colnames(BRSpred::CohortA_post),"Predicted.subtype"])
-
-```
-
-
 ## Testing set (Cohort B)
 
-Performing prediction for cohort B:
+Performing prediction for cohort B, with z-score applied independently to the training samples from cohort A and new data from cohort B:
 
 ```{r}
 CohortB_pred <- BRSpred::BRS(newx = BRSpred::CohortB, scale="independent")
 table(CohortB_pred)
+```
+
+Comparing the predicts produced via ```BRSpred::BRS``` to the original predictions published in de Jong et al:
+
+```{r}
+table(vignette_prediction = CohortB_pred, original_prediction = erasmus_clinical[colnames(BRSpred::CohortB),"Predicted.subtype"])
 ```
 
 Kaplan-Meyer using the predictions for Cohort B:
@@ -145,6 +136,21 @@ survminer::ggsurvplot(fit2,
 	ggtheme = ggplot2::theme_classic(),
 	risk.table.y.text.col = T, risk.table.y.text = FALSE,
 	break.time.by = 24, palette = c("forestgreen", "dodgerblue3", "firebrick")) 
+```
+
+## Post-BCG samples
+
+We run the BRS-classifier for post-BCG samples while z-scaling the new data matrix together with the training data matrix (pre-BCG samples):
+
+```{r}
+CohortA_post_pred <- BRSpred::BRS(newx = BRSpred::CohortA_post, scale="together")
+table(CohortA_post_pred)
+```
+
+Comparing the predicts produced via ```BRSpred::BRS``` to the original predictions published in de Jong et al:
+
+```{r}
+table(vignette_prediction = CohortA_post_pred, original_prediction = erasmus_clinical[colnames(BRSpred::CohortA_post),"Predicted.subtype"])
 ```
 
 ## Heatmaps
@@ -169,12 +175,13 @@ genesets <- list(
 
 ### Cohort A heatmap
 
-Construct geneset-average expression within samples, based on the trained clustering classes (we order samples based on BRS-classes and inside each class based on progression status):
+Construct geneset-average expression within samples for genes that can be found from the data, based on the trained clustering classes (we order samples based on BRS-classes and inside each class based on progression status):
 ```{r}
 suborderA <- rownames(Clinicaldata_A_pre[order(Clinicaldata_A_pre$Erasmus.BRS, Clinicaldata_A_pre$Progression),])
 
 exprsmatA <- do.call("rbind", lapply(genesets, FUN=function(genes){
-	t(as.matrix(colMeans(CohortA_pre[genes,suborderA], na.rm=TRUE)))
+	genes <- genes[which(genes %in% rownames(CohortA_pre))]
+	t(as.matrix(colMeans(CohortA_pre[genes,suborderA,drop=FALSE], na.rm=TRUE)))
 }))
 rownames(exprsmatA) <- names(genesets)
 ```
@@ -211,7 +218,8 @@ We first construct geneset-average expression within samples, with ordering base
 suborderB <- rownames(Clinicaldata_B[order(Clinicaldata_B$CohortB_predict, Clinicaldata_B$Progression, decreasing = FALSE), ])
 
 exprsmatB <- do.call("rbind", lapply(genesets, FUN=function(genes){
-	t(as.matrix(colMeans(CohortB[genes,suborderB], na.rm=TRUE)))
+	genes <- genes[which(genes %in% rownames(CohortB))]
+	t(as.matrix(colMeans(CohortB[genes,suborderB,drop=FALSE], na.rm=TRUE)))
 }))
 rownames(exprsmatB) <- names(genesets)
 ```
