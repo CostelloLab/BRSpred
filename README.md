@@ -8,10 +8,11 @@ The recommended treatment for high-risk non-muscle invasive bladder cancer (HR-N
 
 ## Contents
 
-The `BRSpred` R-package (see **citation**) contains a nearest-centroid classifier that can be used for transcriptomic data of primary HR-NMIBC tumors that were treated with BCG. The BCG Response Subtyper (BRS) identifies 3 distinct molecular classes: BRS1, BRS2 and BRS3 tumors. In addition, the package contains a vignette reproducing the key results from the main manuscript, and comes with two datasets: 
+The `BRSpred` R-package (see **citation**) contains a nearest-centroid classifier pipeline that can be used for transcriptomic data of primary HR-NMIBC tumors that were treated with BCG. The BCG Response Subtyper (BRS) identifies 3 distinct molecular classes: BRS1, BRS2 and BRS3 tumors. In addition, the package contains a vignette reproducing the key results from the main manuscript, and comes with two datasets: 
 
-* Cohort A (n=132): Discovery Cohort
-* Cohort B (n=151): Validation Cohort
+* Cohort A (n=132): Discovery Cohort (pre-BCG), exported data object ```CohortA_pre```
+* Cohort A (n=44): Post-BCG samples, exported data object ```CohortA_post```
+* Cohort B (n=151): Validation Cohort, exported data object ```CohortB```
 
 ## Installation
 
@@ -63,9 +64,9 @@ Use of ```Rtools``` may be needed for compiling the package on Windows.
 
 ## Usage
 
-The main wrapper for the pre-fitted BRS predictor object is the ```BRS```-function; for example predicting the training cohort:
+The main BRS predictor function is the ```BRS```-function; for example predicting the validation cohort:
 ```
-BRSpred::BRS(BRSpred::CohortA.vst)
+BRSpred::BRS(BRSpred::CohortB, scale="independent")
 ```
 
 For further usage and prior results, see the vignette ```BRS prediction```.
