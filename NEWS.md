@@ -1,3 +1,7 @@
+# BRSpred Version 1.1.1 _2023-03-14_
+
+* Clarifications and reformatting in the 'BRS prediction' vignette
+
 # BRSpred Version 1.1.0 _2023-02-15_
 
 * BRS main function revised
