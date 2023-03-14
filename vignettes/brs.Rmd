@@ -1,6 +1,10 @@
 ---
 title: "BRS prediction"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+date: "`r Sys.Date()`"
 vignette: >
   %\VignetteIndexEntry{BRS prediction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -60,7 +64,9 @@ data(erasmus_clinical)
 table(erasmus_clinical$Cohort)
 ```
 
-## Training
+## Discovery of BRS labels
+
+Original discovery of the BRS subclass labels is conducted with the help of the `ConsensusClusterPlus`-package.
 
 Select top 2000 genes based on their variance:
 ```{r}
@@ -104,6 +110,21 @@ survminer::ggsurvplot(fit1,
 	ggtheme = ggplot2::theme_classic(),
 	risk.table.y.text.col = T, risk.table.y.text = FALSE,
 	break.time.by = 24, palette = c("forestgreen", "dodgerblue3",  "firebrick")) 
+```
+
+### ConsensusClusterPlus vs. pamr confusion matrix
+
+The BRS labels provided by `ConsensusClusterPlus` are given as training labels for `pamr`; however, to avoid overfitting, the pamr will not perfectly predict these original labels.
+
+The corresponding confusion matrix is as follows:
+
+```{r}
+
+table(
+  ConsensusClusterPlus_pred = Clinicaldata_A_pre$Erasmus.BRS,
+  pamr_pred = BRSpred::BRS(newx = BRSpred::CohortA_pre, scale = "independent")
+)
+
 ```
 
 ## Testing set (Cohort B)
