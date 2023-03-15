@@ -124,7 +124,7 @@ The corresponding confusion matrix is as follows:
 
 table(
   ConsensusClusterPlus_pred = Clinicaldata_A_pre$Erasmus.BRS,
-  pamr_pred = BRSpred::BRS(newx = BRSpred::CohortA_pre, scale = "independent")
+  pamr_pred = BRSpred::BRS(newx = BRSpred::CohortA_pre, scale = "together")
 )
 
 ```

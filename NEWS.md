@@ -1,3 +1,8 @@
+# BRSpred Version 1.1.2 _2023-03-15_
+
+* Compression of data/-folder contents (.RData)
+* Minor adjustments to 'BRS prediction' vignette
+
 # BRSpred Version 1.1.1 _2023-03-14_
 
 * Clarifications and reformatting in the 'BRS prediction' vignette
