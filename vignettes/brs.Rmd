@@ -25,6 +25,8 @@ knitr::opts_chunk$set(
 
 This R Markdown document is a step-by-step to reproducing the results from the original publication, as well as showing key gene expression results, handling pamr-object input/output, and generalizing the method to new datasets.
 
+First, the process of discovering the BRS labeling via `ConsensusClusterPlus` is illustrated in the Cohort A pre-BCG samples. Then, the use of the main `BRS`-function from this `BRSpred`-package is illustrated by applying the trained `pamr` predictor on the discovered BRS-labels, and predicting for new samples.
+
 ## Citation
 
 If you use ```BRSpred```, please use its corresponding citation at:
@@ -46,7 +48,7 @@ library(BRSpred)
 
 ## Datasets
 
-The package comes with two main dasets:
+The package comes with two main dasets, with Cohort A split into pre- and post-BCG treatment samples:
 
 - Cohort A (training) from Erasmus MC (N=132 total for pre-BCG samples, and additional N=44 for post-BCG samples)
 - Cohort B (testing) from Erasmus MC (N=151 total)
