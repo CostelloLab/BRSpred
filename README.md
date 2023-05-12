@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/427084835.svg)](https://zenodo.org/badge/latestdoi/427084835)
+
 # BCG Response Subtype predictor (*BRSpred*)
 
 <img src="/img/flavor.png" alt="BRSpred workflow" title="BRSpred" width="100%"/>
