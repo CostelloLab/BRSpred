@@ -1,3 +1,7 @@
+# BRSpred Version 1.2.0 _2023-05-12_
+
+* Addition of raw aligned count data matrices for Cohorts A and B (Data S2 in paper)
+
 # BRSpred Version 1.1.2 _2023-03-15_
 
 * Compression of data/-folder contents (.RData)

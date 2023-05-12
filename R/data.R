@@ -35,6 +35,22 @@ NULL
 #' @rdname ErasmusMC
 "CohortB"
 
+#' Gene expression matrices of raw aligned read counts in the Erasmus Medical Center bladder cancer cohort A and B
+#' 
+#' @name CohortAB_counts
+#' @rdname CohortAB_counts
+NULL
+
+#' CohortA and B aligned raw counts data from RNA-seq
+#'
+#' @rdname CohortAB_counts
+"CohortA_counts"
+
+#' CohortA and B aligned raw counts data from RNA-seq
+#'
+#' @rdname CohortAB_counts
+"CohortB_counts"
+
 ## Package documentation
 
 #' BRSpred: BCG Response Subtype Predictor for High-risk Non-Muscle Invasive Bladder Cancer
