@@ -84,3 +84,7 @@ See the vignette ```BRS prediction``` listed for the package at ```vignette(pack
 ## Acknowledgements
 
 The BCG Response Subtyper was developed in a collaboration between the Erasmus MC Cancer Institute, the Anschutz Medical Campus, Cedars-Sinai Samuel Oschin Comprehensive Cancer Institute and University of Turku & the Finnish Cancer Institute.
+
+## Quick contact
+
+For quicker answers to technical questions regarding the R parts and implementation, feel free to email teelaa@utu.fi / daniel.laajala@helsinki.fi
