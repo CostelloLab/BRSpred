@@ -1,3 +1,7 @@
+# BRSpred Version 1.2.1 _2024-08-13_
+
+* Corrections to erasmus_clinical (data provided with the package)
+
 # BRSpred Version 1.2.0 _2023-05-12_
 
 * Addition of raw aligned count data matrices for Cohorts A and B (Data S2 in paper)

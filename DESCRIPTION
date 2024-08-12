@@ -1,7 +1,7 @@
 Package: BRSpred
 Title: BCG Response Subtype Predictor for High-Risk Non-Muscle Invasive Bladder Cancer
-Version: 1.2.0
-Date: 2023-05-12
+Version: 1.2.1
+Date: 2024-08-13
 Authors@R: c(
 	person("Teemu D.", "Laajala", email = "teelaa@utu.fi", role = c("aut", "cre")),
 	person("Florus C.", "de Jong", email = "f.c.dejong@erasmusmc.nl", role = c("aut")),
