@@ -30,7 +30,9 @@ First, the process of discovering the BRS labeling via `ConsensusClusterPlus` is
 ## Citation
 
 If you use ```BRSpred```, please use its corresponding citation at:
-_de Jong, et al. Submitted_
+
+de Jong FC, Laajala TD, Hoedemaeker RF, Jordan KR, van der Made ACJ, Boevé ER, van der Schoot DKE, Nieuwkamer B, Janssen EAM, Mahmoudi T, Boormans JL, Theodorescu D, Costello JC, Zuiverloon TCM. 
+_Non-muscle-invasive bladder cancer molecular subtypes predict differential response to intravesical Bacillus Calmette-Guérin._ Sci Transl Med. 2023 May 24;15(697):eabn4118. doi: [10.1126/scitranslmed.abn4118](https://doi.org/https://doi.org/10.1126/scitranslmed.abn4118)
 
 # BRS pipeline
 
