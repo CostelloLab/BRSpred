@@ -75,14 +75,7 @@ For further usage and prior results, see the vignette ```BRS prediction```.
 
 ## Citation
 
-Florus C. de Jong, Teemu D. Laajala, Robert F. Hoedemaeker, Kimberley R. Jordan, Angelique C.J. van der Made, Egbert R. Boevé, Deric K.E. van der Schoot, Bart Nieuwkamer, Emiel A.M. Janssen, Tokameh Mahmoudi, Joost L. Boormans, Dan Theodorescu, James C. Costello, Tahlita C.M. Zuiverloon
-
-_Non-muscle Invasive Bladder Cancer Molecular Subtypes Predict Differential Response to Intravesical Bacillus Calmette-Guérin_
-
-medRxiv 2021.11.30.21266988; doi: https://doi.org/10.1101/2021.11.30.21266988
-
-*Submitted*
-
+de Jong FC, Laajala TD, Hoedemaeker RF, Jordan KR, van der Made ACJ, Boevé ER, van der Schoot DKE, Nieuwkamer B, Janssen EAM, Mahmoudi T, Boormans JL, Theodorescu D, Costello JC, Zuiverloon TCM. _Non-muscle-invasive bladder cancer molecular subtypes predict differential response to intravesical Bacillus Calmette-Guérin._ Sci Transl Med. 2023 May 24;15(697):eabn4118. doi: [10.1126/scitranslmed.abn4118](https://doi.org/10.1126/scitranslmed.abn4118). Epub 2023 May 24. PMID: 37224225.
 
 ## Reproducing results from de Jong et al.
 
@@ -91,3 +84,7 @@ See the vignette ```BRS prediction``` listed for the package at ```vignette(pack
 ## Acknowledgements
 
 The BCG Response Subtyper was developed in a collaboration between the Erasmus MC Cancer Institute, the Anschutz Medical Campus, Cedars-Sinai Samuel Oschin Comprehensive Cancer Institute and University of Turku & the Finnish Cancer Institute.
+
+## Quick contact
+
+For quicker answers to technical questions regarding the R parts and implementation, feel free to email teelaa@utu.fi / daniel.laajala@helsinki.fi
